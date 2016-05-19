@@ -1,0 +1,2 @@
+# SPICE
+Sequence PredIction Challenge
