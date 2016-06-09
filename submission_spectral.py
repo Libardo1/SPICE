@@ -8,18 +8,22 @@ Tested with Python 2.7 and Python 3.4
 """
 
 # State the problem number
+
+train_path = 'data/train/'
+test_public_path = 'data/test_public/'
+
 problem_number = '0'
 
 # and the user id (given during registration)
-user_id = ''
+user_id = '95'
 
-train_file = problem_number + ".spice.train"
-prefix_file = problem_number + ".spice.public.test"
+train_file = train_path + problem_number + ".spice.train.txt"
+prefix_file = test_public_path +  problem_number + ".spice.public.test.txt"
 
 #set parameter values
 
 #Estimated rank of the Hankel matrix
-rank = 4
+rank = 5
 
 #Allow only some of the possible rows and columns of the matrix
 partial = True
