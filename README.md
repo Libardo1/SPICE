@@ -1,2 +1,2 @@
 # SPICE
-Sequence PredIction Challenge
+[Sequence PredIction Challenge](http://spice.lif.univ-mrs.fr/)
