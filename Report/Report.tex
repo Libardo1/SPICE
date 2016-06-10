@@ -20,7 +20,7 @@ Department of Computer Science\\
 University of California,Irvine \\
 \texttt{email} \\
 \And
-Sai Teja \\
+Sai Teja Ranuva \\
 Department of Computer Science\\
 University of California,Irvine \\
 \texttt{email} \\
@@ -41,23 +41,15 @@ Being able to guess the next element of a sequence is an important question in m
 
 \section{Introduction}
 \label{Introduction}
-\label{Introduction}
-Sequence prediction is an important task in machine learning. Sequence prediction can be defined as the task of predicting the next element given the previous element in a sequence. This task appears naturally in stock market prediction, user browsing action prediction, word prediction in natural languages. Sequence prediction problem also arises prominently in time series data rain fall measurement etc. 
+Sequence prediction is an important task in machine learning. Sequence prediction can be defined as the task of predicting the next element given the previous element in a sequence. This task appears naturally in stock market prediction, user browsing action prediction, word prediction in natural languages. Sequence prediction problem also arises prominently in time series data rain fall measurement etc.
 
 There are various machine learning techniques developed or existing techniques applied to effectively predict the next element in a sequence. The algorithms for sequence prediction can be broadly classified into graphical models, models based on expert advice and recurrent neural network models. Recurrent neural networks and graphical models have been investigated extensively. 
 
-The study of sequence prediction has always been specific to a particular field like Natural 
+Word prediction models can help correct misspelled words in a sentence. Prediction in natural languages do not have to deal with long sequences and also next element in the sentence may depend only words last three or four words. This makes n-gram models very effective in natural language processing and some would argue that with rich n-gram data like Google n-gram data set one need not look outside n-gram models. Word prediction models are being used extensively by various chat messengers like Whatsapp, messenger to aid in texting by predicting the next word that might be typed.
 
-\section{Algorithms}
-\label{Algorithms}
-Other the period, various algorithms have been developed to predict the future values in the sequence data. 
-\subsection{N-Gram Model}
+In case of gene sequence prediction, DNA modelisation, the sequences are long and the next element in the sequence might depend on the the entire sequence seen till now. This calls for much more complex models to predict effectively. Hidden Markov Models have been found to be effective in such scenarios. 
 
-\subsection{Hidden Markov Model(HMMs)}
-
-\subsection{Other}
-
-In this paper, we will focus mainly on N-gram models and Hidden Markov Models.
+The study of sequence prediction has always been tailored specific to a particular field like Natural Language processing, bioinformatics(RNA, DNA sequences) etc which is actually effective. In SPICE challenge, the objective is to predict well on the data without knowing the source of it. The way to go about it would be to compare different approaches on the same data and pick the best performing model. In particular we wish to study N-gram models, Hidden Markov Model using Expectation Maximization and Spectral method and compare the results.
 
 \section{N-gram Model}
 \label{N-Gram Model}
@@ -65,46 +57,78 @@ In this paper, we will focus mainly on N-gram models and Hidden Markov Models.
 \section{Hidden Markov Model}
 \label{HMM}
 
-In simple Markov Model,the states are visible. In Hidden Markov Model, the states are not visible, but the output dependent on the states are observed. Each states has a probability distribution over the possible observations. The sequence of the observations allows to infer the sequence of the hidden states. 
+A Hidden Markov Model is a Markov Model, in which the states being modeled are assumed to be hidden. In Markov Model, the states are directly visible. In Hidden Markov Model, the states are not visible, but the output, dependent on the states are observed. Each states has a probability distribution over the possible observations. The sequence of the observations allows to infer the sequence of the hidden states. 
 
-Consider \(x_t\) be the observed data variable, where t denotes the discrete time or position stamp in the sequence 1...T
+Consider \(Y_t\) be the observed data variable, where t denotes the discrete time or position stamp in the sequence 1...T
 
-The complete observed sequence consists of \(D ={x_1,,,,x_T}\). The hidden state \(z_k\) is a discrete random variable with taking one of the possible K values of \(z_k \in \{1...K\}\)
+The complete observed sequence consists of \(D ={Y_1,,,,Y_T}\). The observation variable $Y_t$ can take one of the N values of \(Y_n \in \{1...n\}\). The hidden state \(X_k\) is a discrete random variable with taking one of the possible K values of \(X_k \in \{1...K\}\)
 
 There are two assumptions in Hidden Markov Model:
 \begin{enumerate}
-\item Observations $x_t$ are conditionlly independent of all other states, given the \(z_t\), i.e the observtion at step \(t\) depends only on the state at time \(t\)
-\item The state of the model at time t+1, \(z_{t+1}\) depends only on \(z_t\), i.e 
-\( p\big(z_{t+1}|z_t,..z_1\big) = p\big(z_{t+1}|z_t\big) \)
+\item Observations $Y_t$ are conditionally independent of all other states, given the \(X_t\), i.e the observation at step \(t\) depends only on the state at time \(t\)
+\item The state of the model at time t+1, \(X_{t+1}\) depends only on \(X_t\), i.e 
+\( p\big(X_{t+1}|X_t,..X_1\big) = p\big(X_{t+1}|X_t\big) \)
 \end{enumerate}
 
 There are three parameters in the model:
 \begin{enumerate}
-\item The initial distribution of the states is defined as \(p\big(z_1|z_0 \big) = \pi\)
-\item Transition matrix A, \(K \times K \), with \(a_{ij} = p\big(z_t=j|z_(t-1)=i\big)\) , \(1\leq i \leq K \).
-\item Emission density distribution B, where \(b_{ij} = p\big(x_t=j|z_t=i\big)\).
+\item The initial distribution of the states is defined as \(p\big(X_1|X_0 \big) = \pi\)
+\item Transition matrix A, \(K \times K \), with \(a_{ij} = p\big(X_t=j|X_(t-1)=i\big)\) , \(1\leq i \leq K \).
+\item Emission density distribution \(B = \{b_{j}\big(y_t\big)\}\) , where \(b_{j}\big(y_t\big) = p\big(Y_t=y_t|X_t=j\big)\).
 \end{enumerate}
 
-We will denote \(x_1,...,x_T\) as \(x_{[1,T]}\), and \(z_1,...,z_T\) as \(z_{[1,T]}\). For the observed data \(D ={x_1,,,,x_T}\), the graphical model can be defined as:
+We will denote \(Y_1,...,Y_T\) as \(Y_{[1,T]}\), and \(X_1,...,X_T\) as \(X_{[1,T]}\). For the observed data \(D ={y_1,,,,y_T}\), the graphical model can be defined as:
 
-\begin{center} \(  p\big( x_{[1,T]}, z_{[1,T]} \big) = \prod_{t=1}^{T}p\big(x_t|z_t\big)p\big(z_t|z_{t-1}\big)  \)
+\begin{center} \(  p\big( Y_{[1,T]}, X_{[1,T]} \big) = \prod_{t=1}^{T}p\big(Y_t|X_t\big)p\big(X_t|X_{t-1}\big)  \)
 \end{center}
 
 In most of the cases, we do not know the Transition Matrix and the Emission density distribution. Only
-the observed data is know. In order to learn the model parameters, we have discussed two algorithms,
-Baum-Welch algorithm which uses Expectation Maximization and Spectral Learning, which used SVD.
+the observed data is known. In order to learn the model parameters, we have discussed two algorithms in the following sections. First one is the Baum-Welch algorithm which uses Expectation Maximization and the second one is Spectral Learning, which uses SVD.
 
 \section{EM algorithm for HMM}
 \label{EM algorithm}
-The Baum-Welch algorithm uses the well-known EM algorithm to learn the unknown parameters of the model. We will need to compute the likelihood of the model in order to learn the parameters.
+The Baum-Welch algorithm uses the well-known EM algorithm to learn the unknown parameters of the model. It makes use of the forward-backward pass algorithm. 
 
-Let $\theta$ denote the model parameters, i.e \( \theta = \big(A,B,\pi\big) \)
-Then likelihood \(L\big(\theta\big)\) of the model can be written as 
-\[L\big(\theta \big)\ = p\big(x_{[1,T]}|\theta \big) \]
-\[L\big(\theta \big)\ = \sum p\big(x_{[1,T]}|\theta \big) \]
+\subsection*{Algorithm}
+Let $\theta$ denote the model parameters, i.e \( \theta = \big(A,B,\pi\big) \). It can be initialize randomly, or based on some prior knowledge.
 
-\subsection{Efficient Computation of the Likelihood}
-The likelihood \(L(\)
+\subsection*{Forward Pass}
+Let $\alpha_i\big(t\big) = P\big(X_t=i,Y_{[1,t]}|\theta\big)$, the probability of observing  $Y_{[1,t]}$, being in state $i$ at time $t$. $\alpha_i\big(t\big)$ can be computed recursively using
+
+\[\alpha_j\big(t+1\big) = b_j\big(y_{t+1}\big)\sum_{i=1}^N\alpha_i\big(t\big)a_{ij}\]
+
+where $\alpha_i\big(1\big) = \pi_ib_j\big(y_1\big)$
+
+\subsection*{Backward Pass}
+Let $\beta_i\big(t\big) = P\big(Y_{[t+1,T]}|X_t=i,\theta\big)$, the probability of observing  $Y_{[t+1,T]}$, being in state $i$ at time $t$. $\beta_i\big(t\big)$ can be computed recursively using
+
+\[\beta_i\big(t\big) = \sum_{j=1}^N\beta_j\big(t+1\big)a_{ij}b_j\big(y_{t+1}\big) \]
+
+where $\beta_i\big(T\big) = 1$
+
+\subsection*{Update}
+Let $\gamma_i\big(t\big)$ be the probability of being in state $i$ at time $t$, having observed the sequence $Y_{[1,T]}$ and model parameters $\theta$.
+
+\[\gamma_i\big(t\big) = P\big( X_t=i|Y_{[1,T]},\theta\big)\]
+
+
+\[\gamma_i\big(t\big) = \frac{\alpha_i\big(t\big) \beta_i\big(t\big)}{\sum_{j=1}^N \alpha_i\big(t\big) \beta_i\big(t\big) }\]
+
+Let $\xi_{ij}\big(t\big)$ be the probability of being in state $i$ and $j$ at time $t$ and $t+1$, having observed the sequence $Y_{[1,T]}$ and model parameters $\theta$.
+
+\[\xi_{ij}\big(t\big) = P\big( X_t=i,X_{t+1}=j|Y_{[1,T]},\theta\big)\]
+
+\[\xi_{ij}\big(t\big) = \frac{\alpha_i\big(t\big)a_{ij}\beta_j\big(t+1\big)b_j\big(y_{t+1}\big)}{\sum_{k=1}^K \alpha_k\big(T\big)}\]
+
+Now, we can update the model parameter $\theta$ using $\gamma_i\big(t\big)$ and $\xi_{ij}\big(t\big)$.
+\begin{itemize}
+\item \( \pi_i^* = \gamma_i\big(1\big) \)	
+\item \( a_{ij}^* = \frac{\sum_{t=1}^{T-1}\xi_{ij}\big(t\big)}{\sum_{t=1}^{T-1}\gamma_{i}\big(t\big)} \)
+\item \( b_i^*\big( v_k \big) = \frac{\sum_{t=1}^{T}1_{y_t=v_k}\gamma_{i}\big(t\big)}{\sum_{t=1}^{T}\gamma_{i}\big(t\big)}\)
+;  where $1_{y_t=v_k}$ is $1$ if $y_t=v_k$ else $0$.
+\end{itemize}
+
+
 
 \section{Spectral Learning}
 \label{Spectral Learning}
@@ -114,17 +138,41 @@ In the above section we have discussed the EM algorithm for learning the paramet
 	\item Approximate the joint liklihood of an observed sequence of length \textit{t}. The quality of approximation degrades as \textit{t} increases.
 	\item Given a future observation, approximate its conditional distribution given some previous observation. 
 \end{enumerate}
-In the analysis presented in this report we are performing both of the above task to approximate the distribution of a future symbol.
-\subsubsection{Priliminaries}
+In the analysis presented in this report we are performing both of the above task to approximate the distribution of a future symbeol.
+\subsection{Priliminaries}
 In this section we will we will briefly describe how an HMM can be represented in a matrix form, followed by the basic notation used in explaining the spectral algorithm. 
 \newline
 We will first consider the matrix notation of forward algorithm (as described in previous sections) an HMM. For each symbol /x, define a matrix $A_x$ as follows -
 \begin{center}
-$[A_x]_{h',h}$
+$[A_x]_{h',h}$ = \textit{t}(h'$\vert$h)o(x$\vert$h) 
 \end{center}
+ 
+where t(h'$\vert$h) is the transition matrix and o is the emission density matrix.
+Now consider a sequence of observed symbols as, $o_1,o_2...o_T$. The joint liklihood of the distribution given by $p(o_1....o_T)$ can be represented as -
+\begin{center}
+$p(o_1....o_T) = 1^T \times A_{o_1} \times A_{o_2} . . . . \times A_{o_T} \times \pi$
+\end{center}
+where $\pi$ is the initial state distribution. We will see that the spectral learning algorithm described in the later sections approximates $A_x$ and there by computes the joint distribution.
 
-
-
+\subsection{Notation}
+Before we describe the spectral learning algorithm, consider the following notations.
+\begin{enumerate}
+\item For each symbol \textit{x} define, 
+\begin{center}
+$[P_{3,x,1}]_{i,j} = P(X_3 = i, X_2 = x, X_1 = j)$
+\end{center}
+where $[P_{3,x,1}]_{i,j}$ denotes the joint probability distribution of the neighboring symbols for a current symbol.
+\item For every symbol \textit{x} define,
+\begin{center}
+$[P_{2,1}]_{i,j} = P(X_2 = j, X_1 = i)$
+\end{center}
+where $[P_{2,1}]_{i,j}$ denotes the joint probability distribution for consecutive symbols in the observation sequence.
+\end{enumerate}
+\subsection{Spectral learning Algorithm}
+Given the list of sequences of observed symbols, following steps outline the spectral learning algorithm.
+\newline
+\newline
+\textbf{Step 1.} Estimate the empirical approximations of $[P_{3,x,1}]_{i,j}$ and $[P_{2,1}]_{i,j}$ as follows - 
 \section{Dataset}
 
 \section{Reults}
