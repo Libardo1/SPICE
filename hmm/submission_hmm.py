@@ -12,7 +12,7 @@
 train_path = '../data/train/'
 test_public_path = '../data/test_public/'
 
-problem_number = '4'
+problem_number = '1'
 
 # and the user id (given during registration)
 user_id = '103'
@@ -20,10 +20,10 @@ user_id = '103'
 train_file = train_path + problem_number + ".spice.train.txt"
 prefix_file = test_public_path +  problem_number + ".spice.public.test.txt"
 
-no_of_hidden_states = 7
+no_of_hidden_states = 10
 no_of_iterations=10
 
-name = 'hmm_{0}_{1}'.format(problem_number, no_of_hidden_states)
+name = 'hmm_{0}_{1}_1'.format(problem_number, no_of_hidden_states)
 
 from numpy import *
 from decimal import *

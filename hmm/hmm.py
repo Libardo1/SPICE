@@ -23,9 +23,6 @@ class Hmm(object):
 
  
 	def train(self,sequences,iterations=10):
- 		done = 0
- 		nStates = self.no_of_hidden_states
- 		
  		updated_sequnece = [ np.asarray([s+1 for s in sequence]+[0]) for sequence in sequences]
 
  		for itr in xrange(iterations):
@@ -36,41 +33,41 @@ class Hmm(object):
 	 		B = self.B
 	 		# print A,B,pi
 
-	 		self.A = np.zeros((nStates,nStates))
-	 		self.B = np.zeros((nStates,self.no_of_observed_states))
-	 		self.pi = np.zeros(nStates)
+	 		self.A = np.zeros((self.no_of_hidden_states,self.no_of_hidden_states))
+	 		self.B = np.zeros((self.no_of_hidden_states,self.no_of_observed_states))
+	 		self.pi = np.zeros(self.no_of_hidden_states)
 
 
  			for sequence in updated_sequnece:
  				sequence = np.asarray(sequence)
- 				nSamples = len(sequence)
+ 				l = len(sequence)
 				# alpha_t(i) = P(O_1 O_2 ... O_t, q_t = S_i | hmm)
 				# Initialize alpha
-				alpha = np.zeros((nStates,nSamples))
-				c = np.zeros(nSamples) #scale factors
+				alpha = np.zeros((self.no_of_hidden_states,l))
+				c = np.zeros(l) #scale factors
 				alpha[:,0] = pi.T * B[:,sequence[0]]
 				c[0] = 1.0/np.sum(alpha[:,0])
 				alpha[:,0] = c[0] * alpha[:,0]
 				# Update alpha for each observation step
-				for t in range(1,nSamples):
+				for t in range(1,l):
 					alpha[:,t] = np.dot(alpha[:,t-1].T, A).T * B[:,sequence[t]]
 					c[t] = 1.0/np.sum(alpha[:,t])
 					alpha[:,t] = c[t] * alpha[:,t]
 
 				# beta_t(i) = P(O_t+1 O_t+2 ... O_T | q_t = S_i , hmm)
 				# Initialize beta
-				beta = np.zeros((nStates,nSamples))
-				beta[:,nSamples-1] = 1
-				beta[:,nSamples-1] = c[nSamples-1] * beta[:,nSamples-1]
+				beta = np.zeros((self.no_of_hidden_states,l))
+				beta[:,l-1] = 1
+				beta[:,l-1] = c[l-1] * beta[:,l-1]
 				# Update beta backwards from end of sequence
 				for t in range(len(sequence)-1,0,-1):
 					beta[:,t-1] = np.dot(A, (B[:,sequence[t]] * beta[:,t]))
 					beta[:,t-1] = c[t-1] * beta[:,t-1]
 
-				xi = np.zeros((nStates,nStates,nSamples-1));
-				for t in range(nSamples-1):
+				xi = np.zeros((self.no_of_hidden_states,self.no_of_hidden_states,l-1));
+				for t in range(l-1):
 					denom = np.dot(np.dot(alpha[:,t].T, A) * B[:,sequence[t+1]].T,beta[:,t+1])
-					for i in range(nStates):
+					for i in range(self.no_of_hidden_states):
 						numer = alpha[i,t] * A[i,:] * B[:,sequence[t+1]].T * beta[:,t+1].T
 						xi[i,:,t] = numer / denom
 
@@ -79,7 +76,7 @@ class Hmm(object):
 				# Need final gamma element for new B
 
 
-				prod =  (alpha[:,nSamples-1] * beta[:,nSamples-1]).reshape((-1,1))
+				prod =  (alpha[:,l-1] * beta[:,l-1]).reshape((-1,1))
 				gamma = np.hstack((gamma,  prod / np.sum(prod))) #append one more to gamma!!!
 				newpi = gamma[:,0]
 				newA = np.sum(xi,2) / np.sum(gamma[:,:-1],axis=1).reshape((-1,1))
