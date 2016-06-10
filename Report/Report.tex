@@ -4,6 +4,7 @@
 \usepackage{url}
 \usepackage{multirow}
 
+
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
 \title{Sequence Prediction using graphical Models }
@@ -63,14 +64,45 @@ In simple Markov Model,the states are visible. In Hidden Markov Model, the state
 
 Consider \(x_t\) be the observed data variable, where t denotes the discrete time or position stamp in the sequence 1...T
 
-The complete observed sequence consists of \(D ={x_1,,,,x_T}\)
+The complete observed sequence consists of \(D ={x_1,,,,x_T}\). The hidden state \(z_k\) is a discrete random variable with taking one of the possible K values of \(z_k \in \{1...K\}\)
 
-\subsection{Learning Model Parameters}
-\subsubsection{EM algorithm}
-\subsubsection{Spectral Learning}
+There are two assumptions in Hidden Markov Model:
+\begin{enumerate}
+\item Observations $x_t$ are conditionlly independent of all other states, given the \(z_t\), i.e the observtion at step \(t\) depends only on the state at time \(t\)
+\item The state of the model at time t+1, \(z_{t+1}\) depends only on \(z_t\), i.e 
+\( p\big(z_{t+1}|z_t,..z_1\big) = p\big(z_{t+1}|z_t\big) \)
+\end{enumerate}
 
-\section{EM algorithm}
+There are three parameters in the model:
+\begin{enumerate}
+\item The initial distribution of the states is defined as \(p\big(z_1|z_0 \big) = \pi\)
+\item Transition matrix A, \(K \times K \), with \(a_{ij} = p\big(z_t=j|z_(t-1)=i\big)\) , \(1\leq i \leq K \).
+\item Emission density distribution B, where \(b_{ij} = p\big(x_t=j|z_t=i\big)\).
+\end{enumerate}
+
+We will denote \(x_1,...,x_T\) as \(x_{[1,T]}\), and \(z_1,...,z_T\) as \(z_{[1,T]}\). For the observed data \(D ={x_1,,,,x_T}\), the graphical model can be defined as:
+
+\begin{center} \(  p\big( x_{[1,T]}, z_{[1,T]} \big) = \prod_{t=1}^{T}p\big(x_t|z_t\big)p\big(z_t|z_{t-1}\big)  \)
+\end{center}
+
+In most of the cases, we do not know the Transition Matrix and the Emission density distribution. Only
+the observed data is know. In order to learn the model parameters, we have discussed two algorithms,
+Baum-Welch algorithm which uses Expectation Maximization and Spectral Learning, which used SVD.
+
+\section{EM algorithm for HMM}
 \label{EM algorithm}
+The Baum-Welch algorithm uses the well-known EM algorithm to learn the unknown parameters of the model. We will need to compute the likelihood of the model in order to learn the parameters.
+
+Let $\theta$ denote the model parameters, i.e \( \theta = \big(A,B,\pi\big) \)
+Then likelihood \(L\big(\theta\big)\) of the model can be written as 
+\[L\big(\theta \big)\ = p\big(x_{[1,T]}|\theta \big) \]
+\[L\big(\theta \big)\ = \sum p\big(x_{[1,T]}|\theta \big) \]
+
+
+
+\subsection{Efficient Computation of the Likelihood}
+The likelihood \(L(\)
+
 \section{Spectral Learning}
 \label{Spectral Learning}
 
