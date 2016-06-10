@@ -15,7 +15,7 @@ user_id = '103'
 
 # name of this submission (no space or special character)
 
-name = "spectral_learning_25"
+name = "spectral_learning_27"
 
 
 train_path = '../data/train/'
@@ -72,7 +72,7 @@ print ("Start Learning")
 nStates = 5
 slhmm_model = SLHMM(nStates,alphabet+1)
 
-slhmm_model.fit(train)
+slhmm_model.learn(train)
 
 print ("Learning Ended")
 
