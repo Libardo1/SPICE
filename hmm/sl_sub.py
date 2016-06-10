@@ -8,14 +8,14 @@
 """
 
 # State the problem number
-problem_number = '2'
+problem_number = '3'
 
 # and the user id (given during registration)
 user_id = '103'
 
 # name of this submission (no space or special character)
 
-name = "spectral_learning_14"
+name = "spectral_learning_25"
 
 
 train_path = '../data/train/'
@@ -69,7 +69,7 @@ print("Get training sample")
 alphabet, train = readset(open(train_file,"r"))
 print ("Start Learning")
 
-nStates = 10
+nStates = 5
 slhmm_model = SLHMM(nStates,alphabet+1)
 
 slhmm_model.fit(train)
