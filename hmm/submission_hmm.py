@@ -9,10 +9,10 @@
 
 # State the problem number
 
-train_path = 'data/train/'
-test_public_path = 'data/test_public/'
+train_path = '../data/train/'
+test_public_path = '../data/test_public/'
 
-problem_number = '1'
+problem_number = '4'
 
 # and the user id (given during registration)
 user_id = '103'
@@ -21,8 +21,9 @@ train_file = train_path + problem_number + ".spice.train.txt"
 prefix_file = test_public_path +  problem_number + ".spice.public.test.txt"
 
 no_of_hidden_states = 7
+no_of_iterations=10
 
-name = 'hmm_{0}_23'.format(no_of_hidden_states)
+name = 'hmm_{0}_{1}'.format(problem_number, no_of_hidden_states)
 
 from numpy import *
 from decimal import *
@@ -66,7 +67,7 @@ alphabet, train = readset(open(train_file,"r"))
 # print train
 print ("Start Learning")
 hmm_model = hmm.Hmm(no_of_hidden_states,alphabet)
-hmm_model.train(train)
+hmm_model.train(train,no_of_iterations)
 print ("Learning Ended")
 
 # get the test first prefix: the only element of the test set
