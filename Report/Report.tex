@@ -136,8 +136,6 @@ Now, we can update the model parameter $\theta$ using $\gamma_i\big(t\big)$ and 
 ;  where $1_{y_t=v_k}$ is $1$ if $y_t=v_k$ else $0$.
 \end{itemize}
 
-
-
 \section{Spectral Learning}
 \label{Spectral Learning}
 
@@ -146,19 +144,20 @@ In the above section we have discussed the EM algorithm for learning the paramet
 	\item Approximate the joint liklihood of an observed sequence of length \textit{t}. The quality of approximation degrades as \textit{t} increases.
 	\item Given a future observation, approximate its conditional distribution given some previous observation. 
 \end{enumerate}
-In the analysis presented in this report we are performing both of the above task to approximate the distribution of a future symbeol.
+In the analysis presented in this report we are performing both of the above task to approximate the distribution of a future symbol.
 \subsection{Priliminaries}
 In this section we will we will briefly describe how an HMM can be represented in a matrix form, followed by the basic notation used in explaining the spectral algorithm. 
 \newline
 We will first consider the matrix notation of forward algorithm (as described in previous sections) an HMM. For each symbol /x, define a matrix $A_x$ as follows -
 \begin{center}
 $[A_x]_{h',h}$ = \textit{t}(h'$\vert$h)o(x$\vert$h) 
+
 \end{center}
  
 where t(h'$\vert$h) is the transition matrix and o is the emission density matrix.
 Now consider a sequence of observed symbols as, $o_1,o_2...o_T$. The joint liklihood of the distribution given by $p(o_1....o_T)$ can be represented as -
 \begin{center}
-$p(o_1....o_T) = 1^T \times A_{o_1} \times A_{o_2} . . . . \times A_{o_T} \times \pi$
+$p(o_1....o_T) = 1^T \times A_{o_T} \times A_{o_{T-1}} . . . . \times A_{o_1} \times \pi$
 \end{center}
 where $\pi$ is the initial state distribution. We will see that the spectral learning algorithm described in the later sections approximates $A_x$ and there by computes the joint distribution.
 
@@ -181,8 +180,45 @@ Given the list of sequences of observed symbols, following steps outline the spe
 \newline
 \newline
 \textbf{Step 1.} Estimate the empirical approximations of $[P_{3,x,1}]_{i,j}$ and $[P_{2,1}]_{i,j}$ as follows - 
-\section{Dataset}
+\begin{enumerate}
+ \item $[\hat{P}_{2,1}]_{i,j} = \frac{Count(X_2 = i, X_1 = j)}{N_{2,1}}$ ,where $N_{2,1}$ is the number total consecutive pairs. and,
+\item $[\hat{P}_{3,x,1}]_{i,j} = \frac{Count(X_3 = i, X_2 = x, X_1 = j)}{N_{3,x,1}}$ ,where $N_{3,x,1}$ is the total number of triples for a particular symbol x.
+\end{enumerate}
 
+\textbf{Step 2.} Compute singular value decomposition of $[\hat{P}_{2,1}]_{i,j}$ 
+\begin{center} SVD($[\hat{P}_{2,1}]_{i,j}$) = $U \in R^{n\times m} ,  \Sigma \in R^{m\times m} , V \in R^{n \times m}$
+\end{center}
+where \textit{m} denotes the rank and is analogous to the number of hidden states in our algorithm.
+
+\textbf{Step 3.} For each symbol x compute $B_x$ as follows -
+\begin{center}
+$B_x = U^T \times [P_{3,x,1}] \times V \times \Sigma^{-1}$
+\end{center}
+
+At this point, it is important that we state the following theorem. We skip the proof for brevity.
+
+\textbf{Theorem 1.} If $P_{2,1}$ is of rank m then,
+\begin{center}
+$B_x = G \times A_X \times G^{-1}$
+\end{center}
+where $G \in R^{m \times m}$ is an invertible matrix.
+
+\textbf{Step 4.} Compute $B_{0}$ and $B_{\inf}$
+\begin{enumerate}
+\item $b_{0} = G\pi$ 
+\item $b_{\inf} = 1^TG^{-1}$
+\end{enumerate}
+
+\textbf{Step 5.} For a given sequence $o_1$, $o_2$, ... $o_T$ and a future symbol $o_{T+1}$ we can compute the joint liklihood of the sequence and the conditional distribution of the future symbol as follows.
+\begin{enumerate}
+\item $\hat{p}(o_1, o_2, ... o_T) = b^{\inf} \times B_{o_{T}} . . . B_{o_{1}} \times b^{0}$, 
+\newline where $\hat{p}(o_1, o_2, ... o_T)$ represents the joint liklihood. Note that all the G's cancel out and we arrive at the forward matrix form of an hmm.
+
+\item $\hat{p}(o_{T+1} \Vert o_{1}...o_{T} ) = \frac{\hat{p}(o_1, o_2, ... o_T, o_{T+1})}{\hat{p}(o_1, o_2, ... o_T)} \propto \hat{p}(o_1, o_2, ... o_T, o_{T+1})$ 
+
+\end{enumerate}
+
+\section{Dataset}
 \section{Reults}
 
 \begin{table}[t]
