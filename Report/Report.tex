@@ -23,12 +23,12 @@ University of California,Irvine \\
 Varun Bharill \\
 Department of Computer Science\\
 University of California,Irvine \\
-\texttt{email} \\
+\texttt{vbharill@uci.edu} \\
 \And
 Sai Teja Ranuva \\
 Department of Computer Science\\
 University of California,Irvine \\
-\texttt{email} \\
+\texttt{ranuva.teja@gmail.com} \\
 }
 
 \newcommand{\fix}{\marginpar{FIX}}
@@ -74,7 +74,27 @@ We can estimate the N-gram probabilities using Maximum Likelihood Estimates
 
 Thus, the general equation for this N-gram approximation to the conditional probability of the next word in a sequence is as follows:
 
-$p\big(s_{i+1}|s_1, . . . , s_{i−1}\big) = p\big(s_i|s_{i-n+1}, . . . , s_{i-1}\big)$
+$p\big(s_{n}|s_1, . . . , s_{n-1}\big) = \frac{Count\big(s_1, . . . , s_{n}\big)}{Count\big(s_1, . . . , s_{n-1}\big)}$
+
+The above formula gives us a decent approximation of the $p\big(s_{n}|s_1, . . . , s_{n−1}\big)$. But what if we haven't seen the sequence $s_1, . . . , s_{n}$ in our training data set ? We might have to assign a zero probability to the sequence. But that might not be a right thing to do. The technique used in machine learning to deal with unseen data is to pull some probability from other sequences and add it to these unseen sequences. This is done using Add 1 smoothing. This process is called smoothing. In Add one smoothing, while calculating the probabilities one has to add one to the numerator and V to the denominator i.e as follows.\\
+$p\big(s_{n}|s_1, . . . , s_{n-1}\big) = \frac{1 + Count\big(s_1, . . . , s_{n}\big)}{V + Count\big(s_1, . . . , s_{n-1}\big)}$
+
+where V is the total number of possible (N-1)-grams 
+
+This method works most of the times in various problem settings. But it hits a problem if we are dealing with too many unseen N-grams. It then sucks away a lot of probability from the observes N-grams to compensate for the unseen N-grams. This can sometime make the model useless. 
+
+There is another way of dealing with unseen N-grams. This technique is called N-gram backoff technique. In this technique, we first try to find the $p\big(s_{n}|s_1, . . . , s_{n-1}\big)$ by using N-grams, in case we do not observe the given N-gram, we backoff to (N-1)-gram and so on. Lets try to generalize this idea. Let us take an example of 3-gram to illustrate the idea.
+
+We calculate the $p\big(s_{n}|s_{n-2},s_{n-1}\big)$, $p\big(s_{n}|s_{n-1}\big)$ and $p\big(s_{n}\big)$ using 3-gram counts, 2-gram counts and 1-gram counts and MLE estimates as described above. Now we take a linear combination of these three as follows:\\
+
+$p\big(s_{n}|s_1, . . . , s_{n-1}\big) = \lambda_1p\big(s_{n}|s_{n-2},s_{n-1}\big) + \lambda_2p\big(s_{n}|s_{n-1}\big) + \lambda_3p\big(s_{n}\big)$ 
+
+where $\lambda_1 + \lambda_2 + \lambda_3 = 1$
+
+The values of lambdas are usually set using heuristics. We set these values as suggested for NLP as $(\lambda_1, \lambda_2, \lambda_3) = (0.5, 0.3, 0.2)$ for 3-grams.
+We shall we investigating this n-gram backoff models on the SPICE challenge data set.
+
+
 \section{Hidden Markov Model}
 \label{HMM}
 
@@ -231,27 +251,38 @@ where $G \in R^{m \times m}$ is an invertible matrix.
 \end{enumerate}
 
 \section{Dataset}
-\section{Reults}
+The dataset we are using for this report is taken from the SPICE challenge. SPICE challenge is a competition where the task is to predict the next element given history. But there is caveat, the data set does not give away how and from where the data is collected like natural language data or DNA sequence data etc. The is basically anonymous with respect the source of generation. Some of the data can also be synthetic but it is not known prior which data set is real world data or which data set is synthetic. The link to the training data set is public and is quoted in the references section. Testing is done online, for each data set that you train, we have to send predictions to the sequences sent by the server online. The accuracy is measured using the NDCG score that we shall describe in the next section.
 
+\section{Normalized discounted cumulative gain (NDCG)}
+Normalized discounted cumulative gain (NDCG) measures the performance of a recommendation system based on the graded relevance of the recommended entities. It varies from 0.0 to 1.0, with 1.0 representing the ideal ranking of the entities. This metric is frequently used in information retrieval and to evaluate the performance of web search engines. In our case we have to predict best possible next five elements. If there was an ideal five next elements for the next five elements which we want compare with, NDCG score gives a natural way of this very issue similar to the ranking of search results.
+
+Here is the NDCG score as described by the competition:\\
+Suppose the test set is made of prefixes $y_1, ..., y_M$. Suppose now that the distinct next symbols ranking submitted for $y_i$ is $(\hat{a}_1^i, ..., \hat{a}_5^i)$ sorted from more likely to less likely. The competition organizers have access to $p(.|y_i)$, the target probability distribution of possible next symbols knowing the prefix $y_i$, therefore they can compute the following measure for prefix $y_i$:
+
+$NDCG_5\big(\hat{a}_1^i, ..., \hat{a}_5^i\big) = \frac{\sum\limits_{k=1}^5 \frac{p(\hat{a}_i^k|y_i)}{log_2(k+1)}}{\sum\limits_{k=1}^5 \frac{p_k}{log_2(k+1)}}$
+
+where $p1 >= p2 >= ... >= p5$ are the top 5 values in the distribution $p(.|yi)$.
+
+This NDCG score is returned back when a submission is made for a model built using a particular data set.
+
+\section{Results}
+We have built models using three different techniques as described above. They are n-gram models, HMM using EM method and spectral learning. We have tuned our models using cross validation on the training data set and then tested the models using the submission code given by the competition. The testing works as follows. Firstly, it is online and therefore each time the submission code gets a sequence and triggers our models to give top 5 predictions. It then reports the top 5 predictions to the server. The server then gives the next sequence and the process continues till all the test sequences are done. At the end of testing, it returns the NDCG score of our predictions. We are reporting these scores in the following tables for all the three methods we have investigated.
+\subsection{Tabular Results}
 \begin{table}[H]
 \caption{N-Gram Model}
 \label{N-Gram_model}
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
 \hline
-\multicolumn{1}{|c|}{\bf Data Set} &\multicolumn{1}{|c|}{\bf \# Symbols} &\multicolumn{1}{|c|}{\bf n-gram} &\multicolumn{1}{|c|}{\bf Accuracy}\\
+\multicolumn{1}{|c|}{\bf Data Set} &\multicolumn{1}{|c|}{\bf \# Symbols} &\multicolumn{1}{|c|}{\bf 3-gram backoff} &\multicolumn{1}{|c|}{\bf 5-grambackoff}\\
 \hline
-\multirow{2}{*}{Data Set 1}& \multirow{2}{*}{2o} & 3 & - \\
-& & 4 & - \\
+\multirow{1}{*}{Data Set 1}& \multirow{1}{*}{20} & 0.46 & 0.28 \\
 \hline
-\multirow{2}{*}{Data Set 2}& \multirow{2}{*}{10} & 3 & - \\
-& & 4 & - \\
+\multirow{1}{*}{Data Set 2}& \multirow{1}{*}{10} & 0.38 & 0.46  \\
 \hline
-\multirow{2}{*}{Data Set 3}& \multirow{2}{*}{10} & 3 & - \\
-& & 4 & - \\
+\multirow{1}{*}{Data Set 3}& \multirow{1}{*}{10} & 0.34 & 0.42 \\
 \hline
-\multirow{2}{*}{Data Set 4}& \multirow{2}{*}{33} & 3 & - \\
-& & 4 & - \\
+\multirow{1}{*}{Data Set 4}& \multirow{1}{*}{33} & 0.53 & 0.35 \\
 \hline
 \end{tabular}
 \end{center}
@@ -313,6 +344,22 @@ where $G \in R^{m \times m}$ is an invertible matrix.
 [2] Frazzoli, Emilio. {\it Intro to Hidden Markov Models the Baum-Welch Algorithm.}
 
 [3] Rabiner, Lawrence First {\it Hand: The Hidden Markov Model}  IEEE Global History Network. Retrieved 2 October 2013
+
+[4] {Manning:2008:IIR:1394399,
+ author = {Manning, Christopher D. and Raghavan, Prabhakar and Sch\"{u}tze, Hinrich},
+ title = {Introduction to Information Retrieval},
+ year = {2008},
+ isbn = {0521865719, 9780521865715},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+} 
+
+[5] Zhong Su, Qiang Yang, Ye Lu and Hongjiang Zhang, "WhatNext: a prediction system for Web requests using n-gram sequence models," Web Information Systems Engineering, 2000. Proceedings of the First International Conference on, Hong Kong, 2000, pp. 214-221 vol.1.
+doi: 10.1109/WISE.2000.882395
+
+[6] N-gram. (2016, May 9). In Wikipedia, The Free Encyclopedia. Retrieved 02:28, June 11, 2016, from https://en.wikipedia.org/w/index.php?title=N-gram\&oldid=719361080
+
+[7] DataSet from SPICE Challenge, website: http://spice.lif.univ-mrs.fr/
 
 
 \end{document}

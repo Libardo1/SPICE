@@ -8,87 +8,78 @@
 """
 
 # State the problem number
-problem_number = '4'
+problem_number = '2'
 
 # and the user id (given during registration)
-user_id = 'Hunter_1'
+user_id = 'Hunter'
 
 # name of this submission (no space or special character)
 
-name = "n_grammodel"
-NULL = -1
-train_file = '4.spice.train.txt'
-prefix_file = '4.spice.public.test.txt'
-ngramModel = 5
+name = "3gram_Baseline"
 
+train_file = '../data/train/2.spice.train.txt'
+prefix_file = '../data/test_public/2.spice.public.test.txt'
+
+from numpy import *
 from decimal import *
-
-import numpy as np
+from sys import *
 
 
 def number(arg):
     return Decimal(arg)
 
 
-def ngramCounts(sequences, N):
-    counts = {}
-    for n in range(1, N + 1):
-        nCounts = {}
-        seq = [tuple([NULL] * (n - 1) + sequence) for sequence in sequences]
-        ngrams = [y for x in [zip(*[sequence[i:] for i in range(n)]) for sequence in seq] for y in x]
-        for ngram in ngrams:
-            if ngram[:-1] in nCounts:
-                if ngram[-1] in nCounts[ngram[:-1]]:
-                    nCounts[ngram[:-1]][ngram[-1]] += 1
+def threegramdict(sett):
+    DPdict = dict()
+    total = 0
+    for sequence in sett:
+        ngramseq = [-1, -1] + sequence + [-2]
+        for start in range(len(ngramseq) - 2):
+            total
+            end = start + 2
+            if tuple(ngramseq[start:end]) in DPdict:
+                table = DPdict[tuple(ngramseq[start:end])]
+                if ngramseq[end] in table:
+                    table[ngramseq[end]] = table[ngramseq[end]] + 1
                 else:
-                    nCounts[ngram[:-1]][ngram[-1]] = 1
+                    table[ngramseq[end]] = 1
+                table[-1] = table[-1] + 1
             else:
-                nCounts[ngram[:-1]] = {}
-                nCounts[ngram[:-1]][ngram[-1]] = 1
-        counts[n] = nCounts
-
-    counts[0] = {}
-    counts[0][()] = {}
-    counts[0][()][()] = sum(counts[1][()].values())
-    return counts
+                table = dict()
+                table[ngramseq[end]] = 1
+                table[-1] = 1
+                DPdict[tuple(ngramseq[start:end])] = table
+    return DPdict
 
 
-#  with smoothing
-def logProb(Wn, Wp, counts, lambdas):
-    Wp = [NULL]*(ngramModel-len(Wp)-1) + Wp
-    #print 'Wp = ', Wp
-    #print 'lambdas = ', lambdas
-    assert len(Wn) == 1 and len(Wp) + 1 == len(lambdas)
-    W = tuple(Wp) + tuple(Wn)
-    #print W
-    wCounts = []
-    for k in range(len(W), -1, -1):
-        #print k
-        if k == 0:
-            wCounts += [counts[0][()][()]]
+def threegramrank(prefix, alphabet, DPdict):
+    probs = []
+    # Compute the probability for prefix to be a whole sequence
+    prob = number('1.0')
+    ngramseq = [-1, -1] + prefix + [-2]
+    for start in range(len(ngramseq) - 2):
+        end = start + 2
+        if tuple(ngramseq[start:end]) in DPdict and ngramseq[end] in DPdict[tuple(ngramseq[start:end])]:
+            prob = prob * (
+            number(DPdict[tuple(ngramseq[start:end])][ngramseq[end]]) / number(DPdict[tuple(ngramseq[start:end])][-1]))
         else:
-            try:
-                wCounts += [counts[k][W[-k:-1]][W[- 1]]]
-            except:
-                wCounts += [0]
-    wProbs = []
-    for k in range(len(wCounts)-1):
-        if wCounts[k] == 0:
-            wProbs += [0]
-        else:
-            wProbs += [float(wCounts[k]) / wCounts[k + 1]]
-    return np.log(np.sum(np.array(lambdas) * np.array(wProbs)))
-
-
-def ngramrank(prefix, alphabet, counts, lambdas, N):
-    #print prefix
-    Wp = prefix[-(N-1):]
-    #print Wp
-    rank = {}
-    for alpha in alphabet:
-        rank[alpha] = logProb([alpha], Wp, counts, lambdas)
-
-    return sorted(rank, key=rank.get, reverse=True)
+            # Subsequence not in the dictionnary
+            prob = number(0)
+    probs.append((-1, prob))
+    for x in range(alphabet):
+        prob = number('1.0')
+        ngramseq = [-1, -1] + prefix + [x]
+        for start in range(len(ngramseq) - 2):
+            end = start + 2
+            if tuple(ngramseq[start:end]) in DPdict and ngramseq[end] in DPdict[tuple(ngramseq[start:end])]:
+                prob = prob * (number(DPdict[tuple(ngramseq[start:end])][ngramseq[end]]) / number(
+                    DPdict[tuple(ngramseq[start:end])][-1]))
+            else:
+                # Subsequence not in the dictionnary
+                prob = number(0)
+        probs.append((x, prob))
+    probs = sorted(probs, key=lambda x: -x[1])
+    return [x[0] for x in probs]
 
 
 def readset(f):
@@ -125,21 +116,19 @@ def formatString(string_in):
 
 
 print("Get training sample")
-alphabet, train = readset(open('../data/train/' + train_file, "r"))
+alphabet, train = readset(open(train_file, "r"))
 print ("Start Learning")
-lambdas = [0.5, 0.3, 0.1, 0.08, 0.02]
-counts = ngramCounts(train, ngramModel)
-
+dict = threegramdict(train)
 print ("Learning Ended")
 
 # get the test first prefix: the only element of the test set
-first_prefix = get_first_prefix('../data/test_public/' + prefix_file)
+first_prefix = get_first_prefix(prefix_file)
 prefix_number = 1
 
 # get the next symbol ranking on the first prefix
 p = first_prefix.split()
 prefix = [int(i) for i in p[1:len(p)]]
-ranking = ngramrank(prefix, range(alphabet), counts, lambdas, ngramModel)
+ranking = threegramrank(prefix, alphabet, dict)
 ranking_string = list_to_string(ranking[:5])
 
 print("Prefix number: " + str(prefix_number) + " Ranking: " + ranking_string + " Prefix: " + first_prefix)
@@ -187,7 +176,7 @@ while (head != '[Error]' and head != '[Success]'):
     p = prefix.split()
     prefix_list = list()
     prefix_list = [int(i) for i in p[1:len(p)]]
-    ranking = ngramrank(prefix_list, range(alphabet), counts, lambdas, ngramModel)
+    ranking = threegramrank(prefix_list, alphabet, dict)
     ranking_string = list_to_string(ranking[:5])
 
     print("Prefix number: " + str(prefix_number) + " Ranking: " + ranking_string + " Prefix: " + prefix)
@@ -222,4 +211,4 @@ print(content)
 list_element = content.split()
 score = (list_element[-1])
 print(score)
-print 'hello'
+
